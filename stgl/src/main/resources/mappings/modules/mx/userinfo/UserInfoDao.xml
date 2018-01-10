@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.mx.dao.userinfo.UserInfoDao">
+    
+	<sql id="userInfoColumns">
+		a.id AS "id",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag",
+		a.age AS "age",
+		a.clazz AS "clazz",
+		a.number AS "number",
+		a.sex AS "sex",
+		a.email AS "email",
+		a.work AS "work",
+		a.honour AS "honour",
+		a.introduction AS "introduction",
+		a.company AS "company",
+		a.mx_score AS "mxScore",
+		a.location AS "location",
+		a.homeplace AS "homeplace"
+	</sql>
+	
+	<sql id="userInfoJoins">
+	</sql>
+    
+	<select id="get" resultType="UserInfo">
+		SELECT 
+			<include refid="userInfoColumns"/>
+		FROM user_info a
+		<include refid="userInfoJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="selectByNumber" resultType="UserInfo">
+		SELECT
+		<include refid="userInfoColumns"/>
+		FROM user_info a
+		<include refid="userInfoJoins"/>
+		WHERE a.number = #{number} AND a.del_flag = 0
+	</select>
+	
+	<select id="findList" resultType="UserInfo">
+		SELECT 
+			<include refid="userInfoColumns"/>
+		FROM user_info a
+		<include refid="userInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="clazz != null and clazz != ''">
+				AND a.clazz LIKE 
+					<if test="dbName == 'oracle'">'%'||#{clazz}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{clazz}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{clazz},'%')</if>
+			</if>
+			<if test="number != null and number != ''">
+				AND a.number LIKE 
+					<if test="dbName == 'oracle'">'%'||#{number}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{number}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{number},'%')</if>
+			</if>
+			<if test="beginMxScore != null and endMxScore != null and beginMxScore != '' and endMxScore != ''">
+				AND a.mx_score BETWEEN #{beginMxScore} AND #{endMxScore}
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="UserInfo">
+		SELECT 
+			<include refid="userInfoColumns"/>
+		FROM user_info a
+		<include refid="userInfoJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO user_info(
+			id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag,
+			age,
+			clazz,
+			number,
+			sex,
+			email,
+			work,
+			honour,
+			introduction,
+			company,
+			location,
+			homeplace
+		) VALUES (
+			#{id},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag},
+			#{age},
+			#{clazz},
+			#{number},
+			#{sex},
+			#{email},
+			#{work},
+			#{honour},
+			#{introduction},
+			#{company},
+			#{location},
+			#{homeplace}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE user_info SET 	
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks},
+			age = #{age},
+			clazz = #{clazz},
+			number = #{number},
+			sex = #{sex},
+			email = #{email},
+			work = #{work},
+			honour = #{honour},
+			introduction = #{introduction},
+			company = #{company},
+			mx_score = #{mxScore},
+			location = #{location},
+			homeplace = #{homeplace}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE user_info SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
